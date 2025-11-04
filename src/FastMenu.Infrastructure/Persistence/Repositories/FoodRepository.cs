@@ -1,9 +1,12 @@
 ﻿using FastMenu.Domain.Dtos.Requests;
 using FastMenu.Domain.Dtos.Response;
 using FastMenu.Domain.Entities;
+using FastMenu.Domain.Filters;
 using FastMenu.Domain.Interfaces;
 using FastMenu.Domain.Results;
 using FastMenu.Infrastructure.Mappers;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
@@ -24,22 +27,20 @@ namespace FastMenu.Infrastructure.Persistence.Repositories
             return Result<FoodResponse>.Success(response);
         }
 
-        public async Task<Result<IEnumerable<FoodResponse>>> GetFoodAlldAsync(CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<FoodResponse>>> GetFoodAlldAsync(FoodFilters filters, CancellationToken cancellationToken)
         {
-            var foodEntities = await _collection.FindAsync(FilterDefinition<FoodEntity>.Empty, cancellationToken: cancellationToken);
+            var pipelineDefinition = PipelineDefinitionBuilder.For<FoodEntity>().As<FoodEntity, FoodEntity, BsonDocument>();
 
-            var listFood = await foodEntities.ToListAsync(cancellationToken);
+            var options = new AggregateOptions { AllowDiskUse = true };
+            var aggregation = await _collection.AggregateAsync(pipelineDefinition, options, cancellationToken);
 
-            if (listFood == null || listFood!.Count == 0)
-            {
-                return Result<IEnumerable<FoodResponse>>.Failure(new Error("Nenhuma comida encontrada", "lista vazia"));
-            }
-            else
-            {
-                var foodDomains = listFood.Select(x => x.ToResponse());
+            var bsonDocuments = await aggregation.ToListAsync();
 
-                return Result<IEnumerable<FoodResponse>>.Success(foodDomains);
-            }
+            var foods = bsonDocuments
+                .Select(bsonDocument => BsonSerializer.Deserialize<FoodEntity>(bsonDocument).ToResponse())
+                .ToList();
+
+            return Result<IEnumerable<FoodResponse>>.Success(foods);
         }
     }
 }
