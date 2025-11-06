@@ -1,6 +1,7 @@
-﻿using FastMenu.Domain.Dtos.Requests;
-using FastMenu.Domain.Dtos.Response;
+﻿using FastMenu.Application.Output.Response;
+using FastMenu.Domain.Dtos.Requests;
 using FastMenu.Domain.Entities;
+using FastMenu.Domain.Filters;
 
 namespace FastMenu.Application.Mappers
 {
@@ -19,9 +20,9 @@ namespace FastMenu.Application.Mappers
             };
         }
 
-        public static FoodResponse ToResponse(this FoodEntity entity)
+        public static GetFoodResponse ToResponse(this FoodEntity entity)
         {
-            var food = new FoodResponse(
+            var food = new GetFoodResponse(
                 entity.Id,
                 entity.Name ?? "",
                 entity.Price,
@@ -30,6 +31,37 @@ namespace FastMenu.Application.Mappers
                 entity.Category);
 
             return food;
+        }
+
+        public static PagedResult<GetFoodResponse> ToResponse(
+          this PagedResult<FoodEntity> pagedResult,
+          PageFilterRequest pageFilterRequest)
+        {
+            return new PagedResult<GetFoodResponse>
+            {
+                PageNumber = pageFilterRequest.Page,
+                PageSize = pageFilterRequest.PageSize,
+                TotalPages = pagedResult.TotalPages,
+                TotalResults = pagedResult.TotalResults,
+                Results = pagedResult.Results.Select(result => result.ToResponse())
+            };
+        }
+
+        public static IEnumerable<GetFoodResponse> ToResponse(this PagedResult<GetFoodResponse> pagedResult)
+        {
+            return pagedResult.Results.Select(x => x);
+        }
+
+        public static PagedResult<GetFoodResponse> ToResponse(this IEnumerable<GetFoodResponse> foods, PageFilterRequest pageFilter)
+        {
+            return new PagedResult<GetFoodResponse>
+            {
+                PageNumber = pageFilter.Page,
+                PageSize = pageFilter.PageSize,
+                Results = foods.Select(x => x),
+                TotalPages = pageFilter.Page,
+                TotalResults = foods.Count()
+            };
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using FastMenu.Domain.Enums;
 
-namespace FastMenu.Domain.Dtos.Response
+namespace FastMenu.Application.Output.Response
 {
-    public sealed record FoodResponse
+    public sealed record GetFoodResponse
     (
         Guid Id,
         string Name,

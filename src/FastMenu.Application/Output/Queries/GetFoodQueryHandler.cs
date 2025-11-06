@@ -1,32 +1,45 @@
 ﻿using FastMenu.Domain.Interfaces;
 using FastMenu.Domain.Results;
 using LiteBus.Queries.Abstractions;
-using FastMenu.Domain.Dtos.Response;
 using FastMenu.Domain.Services;
 using FastMenu.Application.Mappers;
+using FastMenu.Domain.Filters;
+using FastMenu.Application.Output.Response;
 
 namespace FastMenu.Application.Output.Queries
 {
     public class GetFoodQueryHandler(
        IFoodRepository foodRepository,
-       ICacheService cacheService) : IQueryHandler<GetFoodQuery, Result<IEnumerable<FoodResponse>>>
+       ICacheService cacheService) : IQueryHandler<GetFoodQuery, Result<PagedResult<GetFoodResponse>>>
     {
-        public async Task<Result<IEnumerable<FoodResponse>>> HandleAsync(GetFoodQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PagedResult<GetFoodResponse>>> HandleAsync(GetFoodQuery request, CancellationToken cancellationToken)
         {
-            var cached = await cacheService.GetCacheValueAsync<IEnumerable<FoodResponse>>("Foods");
+            var cacheKey = $"Foods_{string.Join(',', request.Foodequest.Ids ?? [])}_" +
+               $"{string.Join(',', request.Foodequest.Names ?? [])}_" +
+               $"{string.Join(',', request.Foodequest.Assessment ?? [])}_" +
+               $"{string.Join(',', request.Foodequest.Categories ?? [])}";
+
+            var cached = await cacheService.GetCacheValueAsync<IEnumerable<GetFoodResponse>>(cacheKey);
 
             if (cached is null || !cached.Any())
             {
-                var response = await foodRepository.GetAllAsync(cancellationToken);
+                var foodFilterBuilder = new FoodFiltersBuilder.Builder()
+                    .WithAssessment(request.Foodequest.Assessment)
+                    .WithCategorys(request.Foodequest.Categories)
+                    .WithFoodIds(request.Foodequest.Ids)
+                    .WithNames(request.Foodequest.Names)
+                    .Build();
 
-                var result = response.Select(x => x.ToResponse());
+                var foods = await foodRepository.GetFoodsAsync(foodFilterBuilder, cancellationToken);
 
-                await cacheService.SetCacheValueAsync("Foods", result, TimeSpan.FromDays(7));
+                var result = foods.ToResponse(request.Foodequest.PageFilter);
 
-                return Result<IEnumerable<FoodResponse>>.Success(result);
+                await cacheService.SetCacheValueAsync("Foods", result.ToResponse(), TimeSpan.FromDays(7));
+
+                return Result<PagedResult<GetFoodResponse>>.Success(result);
             }
 
-            return Result<IEnumerable<FoodResponse>>.Success(cached);
+            return Result<PagedResult<GetFoodResponse>>.Success(cached.ToResponse(request.Foodequest.PageFilter));
         }
     }
 }

@@ -5,10 +5,10 @@ using MongoDB.Driver;
 
 namespace FastMenu.Infrastructure.Stages
 {
-    public static class FoodFilterStage
+    public static class FoodFiltersBuildertage
     {
-        public static PipelineDefinition<FoodEntity, BsonDocument> FilterFood (this PipelineDefinition<FoodEntity, BsonDocument> pipelineDefinition,
-            FoodFilters queryFilter)
+        public static PipelineDefinition<FoodEntity, BsonDocument> FilterFoods (this PipelineDefinition<FoodEntity, BsonDocument> pipelineDefinition,
+            FoodFiltersBuilder queryFilter)
         {
             var matchFilter = BuildMatchFilter(queryFilter);
             if (matchFilter != FilterDefinition<BsonDocument>.Empty)
@@ -19,7 +19,7 @@ namespace FastMenu.Infrastructure.Stages
             return pipelineDefinition;
         }
 
-        private static FilterDefinition<BsonDocument> BuildMatchFilter(FoodFilters queryFilter)
+        private static FilterDefinition<BsonDocument> BuildMatchFilter(FoodFiltersBuilder queryFilter)
         {
             var filters = new List<FilterDefinition<BsonDocument>>
         {
@@ -40,7 +40,7 @@ namespace FastMenu.Infrastructure.Stages
             };
         }
 
-        private static FilterDefinition<BsonDocument> MatchByCustomerIds(FoodFilters queryFilter)
+        private static FilterDefinition<BsonDocument> MatchByCustomerIds(FoodFiltersBuilder queryFilter)
         {
             if (queryFilter?.FoodIds == null || !queryFilter.FoodIds.Any())
             {
@@ -55,23 +55,23 @@ namespace FastMenu.Infrastructure.Stages
             return filter;
         }
 
-        private static FilterDefinition<BsonDocument> MatchByAssessment(FoodFilters queryFilter)
+        private static FilterDefinition<BsonDocument> MatchByAssessment(FoodFiltersBuilder queryFilter)
         {
             if (queryFilter?.Assessment == null || !queryFilter.Assessment.Any())
                 return FilterDefinition<BsonDocument>.Empty;
 
-            return new BsonDocument("Name", new BsonDocument("$in", new BsonArray(queryFilter.Names)));
+            return new BsonDocument("Assessment", new BsonDocument("$in", new BsonArray(queryFilter.Assessment)));
         }
 
-        private static FilterDefinition<BsonDocument> MatchByCategorys(FoodFilters queryFilter)
+        private static FilterDefinition<BsonDocument> MatchByCategorys(FoodFiltersBuilder queryFilter)
         {
             if (queryFilter?.Categorys == null || !queryFilter.Categorys.Any())
                 return FilterDefinition<BsonDocument>.Empty;
 
-            return new BsonDocument("Name", new BsonDocument("$in", new BsonArray(queryFilter.Names)));
+            return new BsonDocument("Category", new BsonDocument("$in",new BsonArray(queryFilter.Categorys.Select(c => c.ToString()))));
         }
 
-        private static FilterDefinition<BsonDocument> MatchByNames(FoodFilters queryFilter)
+        private static FilterDefinition<BsonDocument> MatchByNames(FoodFiltersBuilder queryFilter)
         {
             if (queryFilter?.Names == null || !queryFilter.Names.Any())
                 return FilterDefinition<BsonDocument>.Empty;

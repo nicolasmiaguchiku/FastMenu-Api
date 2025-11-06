@@ -1,5 +1,6 @@
 ﻿using FastMenu.Domain.Interfaces;
 using MongoDB.Driver;
+using System.Linq.Expressions;
 
 namespace FastMenu.Infrastructure.Persistence.Repositories
 {
@@ -10,12 +11,6 @@ namespace FastMenu.Infrastructure.Persistence.Repositories
         public async Task AddAsync(TEntity entity, CancellationToken cancellationToken)
         {
              await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
-        }
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken)
-        {
-            var results = await _collection.Find(FilterDefinition<TEntity>.Empty).ToListAsync(cancellationToken);
-            return results;
         }
     }
 }
