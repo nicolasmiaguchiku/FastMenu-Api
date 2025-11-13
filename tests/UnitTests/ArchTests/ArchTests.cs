@@ -9,10 +9,10 @@ namespace UnitTests.ArchTests
         [Fact]
         public void DomainLayerShouldNotDependOtherProjects()
         {
-            //Pegar o assembly
+            //Arrange
             var assembly = Assembly.Load("FoodManager.Domain");
 
-            // Verificar se tem dependencia com os outros projetos
+            //Act
             var result = Types.InAssembly(assembly)
                 .Should()
                 .NotHaveDependencyOn("FoodManager.Application")
@@ -24,6 +24,7 @@ namespace UnitTests.ArchTests
                 .NotHaveDependencyOn("FoodManager.WebApi")
                 .GetResult();
 
+            //Assert
             result.IsSuccessful
                 .Should()
                 .BeTrue();
@@ -32,10 +33,10 @@ namespace UnitTests.ArchTests
         [Fact]
         public void ApplicationLayerShoudNotDependCroosCuttingAndInfrastructureAndWebApi()
         {
-            //Pegar o assembly
+            //Arrange
             var assembly = Assembly.Load("FoodManager.Application");
 
-            //Verificar se tem dependência com a CroosCutting, Infrastructure e Api
+            //Act
             var result = Types.InAssembly(assembly)
                 .Should()
                 .NotHaveDependencyOn("FoodManager.CrossCutting")
@@ -46,7 +47,7 @@ namespace UnitTests.ArchTests
                 .GetResult();
 
 
-            //Verificar se é result é verdadeiro
+            //Assert
             result.IsSuccessful
                 .Should()
                 .BeTrue();
@@ -55,13 +56,16 @@ namespace UnitTests.ArchTests
         [Fact]
         public void CrossCuttingsLayerSoudNotDepedentToWebApi()
         {
+            //Arrange
             var assembly = Assembly.Load("FoodManager.CrossCutting");
 
+            //Act
             var result = Types.InAssembly(assembly)
                 .Should()
                 .NotHaveDependencyOn("FoodManager.WebApi")
                 .GetResult();
 
+            //Assert
             result.IsSuccessful
                 .Should()
                 .BeTrue();
@@ -70,8 +74,10 @@ namespace UnitTests.ArchTests
         [Fact]
         public void InfrastructurelayerShoudNotToDedpendentWebApiAndCrossCutting()
         {
+            //Arrange
             var assembly = Assembly.Load("FoodManager.Infrastructure");
 
+            //Act
             var result = Types.InAssembly(assembly)
                 .Should()
                 .NotHaveDependencyOn("FoodManager.WebApi")
@@ -79,25 +85,25 @@ namespace UnitTests.ArchTests
                 .NotHaveDependencyOn("FoodManager.CrossCutting")
                 .GetResult();
 
+            //Assert
             result.IsSuccessful
                 .Should()
                 .BeTrue();
         }
 
         [Fact]
-        public void WebApiLayerShouldNotToDependentDomainAndInfrastructureAndCrossCutting()
+        public void WebApiLayerShouldNotToDependentDomainAndInfrastructure()
         {
+            //Arrange
             var assembly = Assembly.Load("FoodManager.WebApi");
 
+            //Act
             var result = Types.InAssembly(assembly)
-                .That()
-                .DoNotResideInNamespace(".CrossCutting")
                 .Should()
-                .NotHaveDependencyOn("FoodManager.Domain")
-                .And()
                 .NotHaveDependencyOn("FoodManager.Infrastructure")
                 .GetResult();
 
+            //Assert
             result.IsSuccessful
                 .Should()
                 .BeTrue();

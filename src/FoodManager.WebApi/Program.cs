@@ -18,7 +18,8 @@ builder.Services
     .AddServices()
     .AddValidators()
     .ConfigureLiteBus()
-    .AddOpenApi("v1").AddControllers();
+    .AddOpenApi("v1")
+    .AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 

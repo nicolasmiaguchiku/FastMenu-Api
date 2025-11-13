@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace FoodManager.Infrastructure.Stages
 {
-    public static class FoodFiltersBuildertage
+    public static class FoodFiltersBuilderStage
     {
         public static PipelineDefinition<FoodEntity, BsonDocument> FilterFoods (this PipelineDefinition<FoodEntity, BsonDocument> pipelineDefinition,
             FoodFiltersBuilder queryFilter)
