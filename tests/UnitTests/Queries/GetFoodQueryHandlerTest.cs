@@ -10,14 +10,14 @@ using Moq;
 
 namespace UnitTests.Queries
 {
-    public class GetFoodQueryHandlerTest
+    public class GetFooQueryHandlerTest
     {
         private readonly Mock<IFoodRepository> _foodRepositoryMock = new();
         private readonly Mock<ICacheService> _cacheServiceMock = new();
         private readonly Fixture _fixture = new();
         private readonly GetFoodQueryHandler _handler;
 
-        public GetFoodQueryHandlerTest()
+        public GetFooQueryHandlerTest()
         {
             _handler = new GetFoodQueryHandler(_foodRepositoryMock.Object, _cacheServiceMock.Object);
         }
@@ -27,7 +27,7 @@ namespace UnitTests.Queries
         {
             var request = _fixture.Create<GetFoodQuery>();
 
-            var expectedResult = _fixture.CreateMany<GetFoodResponse>(5);
+            var expectedResult = _fixture.CreateMany<FoodEntity>(5);
 
             _foodRepositoryMock
                 .Setup(r => r.GetFoodsAsync(It.IsAny<FoodFiltersBuilder>(), It.IsAny<CancellationToken>()))
@@ -37,7 +37,7 @@ namespace UnitTests.Queries
                     PageSize = 5,
                     TotalPages = 1,
                     TotalResults = 5,
-                    Results = _fixture.CreateMany<FoodEntity>(5)
+                    Results = expectedResult
                 });
 
             var result = await _handler.HandleAsync(request, CancellationToken.None);
