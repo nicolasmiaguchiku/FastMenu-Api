@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FoodManager.CrossCutting\FoodManager.CrossCutting.csproj" />
+    <ProjectReference Include="..\FoodManager.Catalog.CrossCutting\FoodManager.Catalog.CrossCutting.csproj" />
   </ItemGroup>
 
 </Project>
