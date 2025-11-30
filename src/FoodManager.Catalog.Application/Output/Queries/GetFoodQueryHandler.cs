@@ -1,16 +1,19 @@
-﻿using LiteBus.Queries.Abstractions;
+﻿using FoodManager.Catalog.Application.Input.Handlers.Commands;
 using FoodManager.Catalog.Application.Mappers;
-using FoodManager.Catalog.Domain.Filters;
 using FoodManager.Catalog.Application.Output.Response;
-using FoodManager.Catalog.Domain.Interfaces.Services;
-using FoodManager.Catalog.Domain.Interfaces.Repositories;
 using FoodManager.Catalog.Catalog.Domain.Results;
+using FoodManager.Catalog.Domain.Filters;
+using FoodManager.Catalog.Domain.Interfaces.Repositories;
+using FoodManager.Catalog.Domain.Interfaces.Services;
+using LiteBus.Queries.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace FoodManager.Catalog.Application.Output.Queries
 {
     public class GetFoodQueryHandler(
        IFoodRepository _repository,
-       ICacheService cacheService) : IQueryHandler<GetFoodQuery, Result<PagedResult<GetFoodResponse>>>
+       ICacheService cacheService,
+       ILogger<GetFoodQueryHandler> _logger) : IQueryHandler<GetFoodQuery, Result<PagedResult<GetFoodResponse>>>
     {
         public async Task<Result<PagedResult<GetFoodResponse>>> HandleAsync(GetFoodQuery request, CancellationToken cancellationToken)
         {
@@ -19,27 +22,30 @@ namespace FoodManager.Catalog.Application.Output.Queries
                $"{string.Join(',', request.Foodequest.Assessment ?? [])}_" +
                $"{string.Join(',', request.Foodequest.Categories ?? [])}";
 
-            var cached = await cacheService.GetCacheValueAsync<IEnumerable<GetFoodResponse>>(cacheKey);
+            var cached = await cacheService.GetCacheValueAsync<PagedResult<GetFoodResponse>>(cacheKey);
 
-            if (cached is null || !cached.Any())
+            if (cached != null)
             {
-                var foodFilterBuilder = new FoodFiltersBuilder.Builder()
-                    .WithAssessment(request.Foodequest.Assessment)
-                    .WithCategorys(request.Foodequest.Categories)
-                    .WithFoodIds(request.Foodequest.Ids)
-                    .WithNames(request.Foodequest.Names)
-                    .Build();
-
-                var foods = await _repository.GetFoodsAsync(foodFilterBuilder, cancellationToken);
-
-                var result = foods.ToResponse(request.Foodequest.PageFilter);
-
-                await cacheService.SetCacheValueAsync("Foods", result.ToResponse(), TimeSpan.FromDays(7));
-
-                return Result<PagedResult<GetFoodResponse>>.Success(result);
+                _logger.LogInformation("Foods retrieved from cache successfully");
+                return Result<PagedResult<GetFoodResponse>>.Success(cached);
             }
 
-            return Result<PagedResult<GetFoodResponse>>.Success(cached.ToResponse(request.Foodequest.PageFilter));
+            var foodFilterBuilder = new FoodFiltersBuilder.Builder()
+                .WithAssessment(request.Foodequest.Assessment)
+                .WithCategorys(request.Foodequest.Categories)
+                .WithFoodIds(request.Foodequest.Ids)
+                .WithNames(request.Foodequest.Names)
+                .Build();
+
+            var foods = await _repository.GetFoodsAsync(foodFilterBuilder, cancellationToken);
+
+            var result = foods.ToResponse(request.Foodequest.PageFilter);
+
+            await cacheService.SetCacheValueAsync(cacheKey, result, TimeSpan.FromDays(7));
+
+            _logger.LogInformation("Foods retrieved from dataBase successfully");
+
+            return Result<PagedResult<GetFoodResponse>>.Success(result);
         }
     }
 }

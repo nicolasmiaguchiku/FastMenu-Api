@@ -13,11 +13,11 @@ namespace FoodManager.Catalog.CrossCutting.Extentions
             if (!env.IsDevelopment())
             {
                 settings!.MongoSettings.ConnectionString = GetEnvironmentVariableValue("ConnectionString_Mongo", settings.MongoSettings.ConnectionString);
+                settings.MltSettings.SeqUrl = GetEnvironmentVariableValue("SeqUrl", settings.MltSettings.SeqUrl);
             }
 
             return settings!;
         }
-
         private static string GetEnvironmentVariableValue(string key, string? fallback)
         {
             var value = Environment.GetEnvironmentVariable(key);

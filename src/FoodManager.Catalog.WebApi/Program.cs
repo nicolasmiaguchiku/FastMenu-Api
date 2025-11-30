@@ -22,13 +22,15 @@ builder.Services
     .AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
+builder.Host.UseSerilog(enviroment!, applicationSettings.MltSettings.SeqUrl!);
 
 var app = builder.Build();
 
 app.MapOpenApi();
 app.MapScalarApiReference(options => options.Servers = []);
 
-app.UseHttpsRedirection()
+app.UseRequestContextLogging()
+    .UseHttpsRedirection()
     .UseAuthorization();
 
 app.MapControllers();

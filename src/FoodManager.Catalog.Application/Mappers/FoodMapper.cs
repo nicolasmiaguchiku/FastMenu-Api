@@ -47,11 +47,6 @@ namespace FoodManager.Catalog.Application.Mappers
             };
         }
 
-        public static IEnumerable<GetFoodResponse> ToResponse(this PagedResult<GetFoodResponse> pagedResult)
-        {
-            return pagedResult.Results.Select(x => x);
-        }
-
         public static PagedResult<GetFoodResponse> ToResponse(this IEnumerable<GetFoodResponse> foods, PageFilterRequest pageFilter)
         {
             return new PagedResult<GetFoodResponse>

@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Ignorar appsettings de desenvolvimento do WebApi
+src/FoodManager.Catalog.WebApi/appsettings.Development.json

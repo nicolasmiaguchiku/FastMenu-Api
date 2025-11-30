@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using DnsClient.Internal;
 using FluentAssertions;
 using FoodManager.Catalog.Application.Output.Queries;
 using FoodManager.Catalog.Application.Output.Response;
@@ -6,6 +7,7 @@ using FoodManager.Catalog.Domain.Entities;
 using FoodManager.Catalog.Domain.Filters;
 using FoodManager.Catalog.Domain.Interfaces.Repositories;
 using FoodManager.Catalog.Domain.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace UnitTests.Queries
@@ -14,12 +16,13 @@ namespace UnitTests.Queries
     {
         private readonly Mock<IFoodRepository> _foodRepositoryMock = new();
         private readonly Mock<ICacheService> _cacheServiceMock = new();
+        private readonly Mock<ILogger<GetFoodQueryHandler>> _loggerServiceMock = new();
         private readonly Fixture _fixture = new();
         private readonly GetFoodQueryHandler _handler;
 
         public GetFooQueryHandlerTest()
         {
-            _handler = new GetFoodQueryHandler(_foodRepositoryMock.Object, _cacheServiceMock.Object);
+            _handler = new GetFoodQueryHandler(_foodRepositoryMock.Object, _cacheServiceMock.Object, _loggerServiceMock.Object);
         }
 
         [Fact]
