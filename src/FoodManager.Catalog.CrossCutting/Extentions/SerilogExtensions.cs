@@ -39,10 +39,7 @@ namespace FoodManager.Catalog.CrossCutting.Extentions
             return app;
         }
 
-        public static IHostBuilder UseSerilog(
-            this IHostBuilder builder,
-            string serviceName,
-            string seqUrl)
+        public static IHostBuilder UseSerilog(this IHostBuilder builder, string serviceName, string seqUrl)
         {
             builder.UseSerilog((context, loggerConfiguration) =>
             {
@@ -59,7 +56,7 @@ namespace FoodManager.Catalog.CrossCutting.Extentions
                         .MinimumLevel.Debug()
                         .WriteTo.Console(outputTemplate:
                             "{Timestamp:yyyy-MM-dd HH:mm:ss} | {Level} | CorrelationId:{CorrelationId} | RequestPath:{RequestPath} | Env:{Environment} | {SourceContext} | {Message} | {Exception}{NewLine}")
-                        .WriteTo.Seq(seqUrl); 
+                        .WriteTo.Seq(seqUrl);
                 }
                 else
                 {
